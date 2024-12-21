@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Video Stream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/mpegts.js"></script>
+    <style>
+        #video {
+            width: 100%;
+            max-width: 100vw;
+            height: auto;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" controls playsinline webkit-playsinline></video>
+    <script>
+        const video = document.getElementById('video');
+        
+        // 检测是否是 iOS 设备
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if (isIOS) {
+            // iOS 设备直接使用 HLS
+            const hlsUrl = `${window.location.protocol}//${window.location.host}/hls/stream.m3u8`;
+            video.src = hlsUrl;
+            video.addEventListener('loadedmetadata', () => {
+                video.play().catch(e => console.error('播放失败:', e));
+            });
+        } else {
+            // 非 iOS 设备使用 WebSocket
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+
+            try {
+                const player = mpegts.createPlayer({
+                    type: 'mpegts',
+                    url: wsUrl,
+                    isLive: true,
+                    enableStashBuffer: false,
+                    liveBufferLatencyChasing: true,
+                    config: {
+                        lazyLoad: false,
+                        autoCleanupSourceBuffer: true,
+                        stashInitialSize: 512,
+                        fixAudioTimestampGap: true
+                    }
+                });
+                
+                player.attachMediaElement(video);
+                player.load();
+
+                player.on('error', e => console.error('播放器错误:', e));
+            } catch (e) {
+                console.error('初始化错误:', e);
+            }
+        }
+    </script>
+</body>
+</html>
