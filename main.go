@@ -22,28 +22,12 @@ func init() {
 	// 读取配置文件
 	data, err := os.ReadFile("config.json")
 	if err != nil {
-		// 如果配置文件不存在，使用默认值
-		config = Config{
-			StreamSource: "rtsp://localhost:554/live",
-		}
-		// 创建默认配置文件
-		saveConfig()
-		return
+		log.Fatal("无法读取配置文件 config.json:", err)
 	}
 
 	// 解析配置文件
 	if err := json.Unmarshal(data, &config); err != nil {
 		log.Fatal("配置文件格式错误:", err)
-	}
-}
-
-func saveConfig() {
-	data, err := json.MarshalIndent(config, "", "    ")
-	if err != nil {
-		log.Fatal("保存配置失败:", err)
-	}
-	if err := os.WriteFile("config.json", data, 0644); err != nil {
-		log.Fatal("写入配置文件失败:", err)
 	}
 }
 
