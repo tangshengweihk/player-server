@@ -38,13 +38,11 @@
                     type: 'mpegts',
                     url: wsUrl,
                     isLive: true,
-                    enableStashBuffer: false,
-                    liveBufferLatencyChasing: true,
+                    // enableStashBuffer: false, // 禁用缓存
+                    // liveBufferLatencyChasing: true,
                     config: {
-                        lazyLoad: false,
-                        autoCleanupSourceBuffer: true,
-                        stashInitialSize: 512,
-                        fixAudioTimestampGap: true
+                        enableStashBuffer: false, // 禁用IO缓存以实现低延迟
+                        autoCleanupSourceBuffer: true // 自动清理缓存
                     }
                 });
                 
